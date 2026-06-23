@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свадебное Приглашение — Влад и Диана (Ocean Edition)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            background: #0f4c5c; 
+            color: #e5f1f4;
+        }
+        .wrapper { width: 100%; max-width: 450px; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px 10px; z-index: 10; }
+        .falling-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; top: -20px; pointer-events: none; animation: fall linear infinite; }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg) scale(0.7); opacity: 0; }
+            15% { opacity: 0.85; }
+            85% { opacity: 0.85; }
+            100% { transform: translateY(105vh) rotate(240deg) scale(1.1); opacity: 0; }
+        }
+        .screen { display: none; width: 100%; text-align: center; animation: fadeIn 0.6s ease forwards; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* КОНВЕРТ */
+        .envelope-box {
+            width: 100%; max-width: 360px; background: #1d7085; border: 1px solid #e2c074;
+            border-radius: 12px; padding: 50px 20px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); margin-bottom: 30px;
+        }
+        .stamp {
+            width: 75px; height: 75px; border-radius: 50%; background: #0f4c5c; color: #e2c074;
+            border: 1px dashed #e2c074; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.3rem; font-weight: bold;
+        }
+        .envelope-label { font-size: 1.1rem; font-style: italic; margin-bottom: 10px; opacity: 0.9; }
+        .guest-name { font-size: 2.2rem; margin-bottom: 35px; }
+        .btn-open {
+            background: #e2c074; color: #0f4c5c; border: none; padding: 16px 36px;
+            font-size: 1.05rem; border-radius: 50px; cursor: pointer; font-weight: bold; transition: transform 0.2s;
+        }
+        .btn-open:hover { transform: scale(1.03); }
+
+        /* КАРТОЧКА */
+        .card {
+            width: 100%; padding: 35px 15px; background: #1d7085; border: 1px solid #e2c074;
+            border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 30px;
+        }
+        .title-top { font-size: 0.85rem; letter-spacing: 4px; color: #e2c074; font-weight: bold; }
+        .main-names { font-size: 2.8rem; font-weight: bold; line-height: 1.1; }
+        
+        /* Таймер */
+        .timer-title { font-size: 0.8rem; letter-spacing: 2px; color: #e2c074; }
+        .countdown { display: flex; justify-content: center; gap: 10px; }
+        .time-item { display: flex; flex-direction: column; font-size: 1.5rem; font-weight: bold; min-width: 45px; color: #e2c074; }
+        .time-label { font-size: 0.6rem; color: #ffffff; opacity: 0.7; margin-top: 4px; }
+
+        /* Детали */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-box { padding: 15px 10px; border-radius: 14px; font-size: 0.9rem; background: #25829b; border: 1px solid #2d94b0; }
+        .info-box h4 { font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 5px; color: #e2c074; }
+        .full-box { grid-column: span 2; padding: 15px; border-radius: 14px; font-size: 0.9rem; background: #25829b; border: 1px solid #2d94b0; }
+        
+        /* Кнопка карты */
+        .map-link-btn {
+            display: inline-block; background: #0f4c5c; color: #e2c074; border: 1px solid #e2c074;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; margin-top: 10px; font-weight: bold;
+        }
+        .map-link-btn:hover { background: #e2c074; color: #0f4c5c; }
+
+        /* RSVP Опрос */
+        .rsvp-section { background: #25829b; border: 1px dashed #e2c074; padding: 20px 15px; border-radius: 16px; }
+        .rsvp-title { font-size: 1.1rem; color: #e2c074; margin-bottom: 12px; font-weight: bold; }
+        .rsvp-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .rsvp-btn { padding: 12px 20px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem; width: 45%; }
+        .btn-yes { background: #e2c074; color: #0f4c5c; }
+        .btn-no { background: #0f4c5c; color: #e5f1f4; border: 1px solid #2d94b0; }
+        .status-message { margin-top: 10px; font-size: 0.85rem; font-style: italic; display: none; color: #e2c074; }
+        .footer-text { font-size: 0.85rem; font-style: italic; color: #e2c074; }
+    </style>
+</head>
+<body>
+    <div class="falling-container" id="particles"></div>
+    <div class="wrapper">
+        <div id="screen-envelope" class="screen active">
+            <div class="envelope-box"><div class="stamp">В&Д</div></div>
+            <div class="envelope-label">Приглашение для</div>
+            <h1 class="guest-name">Дорогого Гостя</h1>
+            <button class="btn-open" onclick="openEnvelope()">✦ Открыть приглашение ✦</button>
+        </div>
+        <div id="screen-main" class="screen">
+            <div class="card">
+                <div class="title-top">СВАДЕБНОЕ ПРИГЛАШЕНИЕ</div>
+                <div class="main-names">Влад & Диана</div>
+                <div>С огромной радостью приглашаем вас разделить с нами этот особенный день нашей жизни!</div>
+                <div class="timer-container">
+                    <div class="timer-title">ДО СВАДЬБЫ ОСТАЛОСЬ:</div>
+                    <div class="countdown" style="margin-top:8px;">
+                        <div class="time-item"><span id="days">00</span><span class="time-label">ДНЕЙ</span></div>
+                        <div style="font-size:1.5rem; color:#e2c074;">:</div>
+                        <div class="time-item"><span id="hours">00</span><span class="time-label">ЧАСОВ</span></div>
+                        <div style="font-size:1.5rem; color:#e2c074;">:</div>
+                        <div class="time-item"><span id="minutes">00</span><span class="time-label">МИНУТ</span></div>
+                        <div style="font-size:1.5rem; color:#e2c074;">:</div>
+                        <div class="time-item"><span id="seconds">00</span><span class="time-label">СЕКУНД</span></div>
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-box"><h4>ДАТА</h4><strong>20 сентября</strong><br>2027 года</div>
+                    <div class="info-box"><h4>ВРЕМЯ</h4>Никах — 14:00<br>Банкет — 18:00</div>
+                    <div class="full-box">
+                        <h4>МЕСТО ПРОВЕДЕНИЯ</h4>Свадебный зал «Жемчужина»<br><span style="font-size: 0.8rem; opacity: 0.7;">ул. Навои 12, Ташкент</span><br>
+                        <a href="https://maps.google.com" target="_blank" class="map-link-btn">📍 Открыть карту</a>
+                    </div>
+                </div>
+                <div class="rsvp-section">
+                    <div class="rsvp-title">Подтвердите ваше присутствие:</div>
+                    <p style="font-size: 0.85rem; opacity: 0.9;">Пожалуйста, ответьте до 1 сентября</p>
+                    <div class="rsvp-buttons">
+                        <button class="rsvp-btn btn-yes" onclick="submitRSVP('Да')">Я приду</button>
+                        <button class="rsvp-btn btn-no" onclick="submitRSVP('Нет')">Не смогу</button>
+                    </div>
+                    <div class="status-message" id="status-msg"></div>
+                </div>
+                <div class="footer-text">Ваше присутствие — лучший подарок! ✨</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openEnvelope() { document.getElementById('screen-envelope').classList.remove('active'); document.getElementById('screen-main').classList.add('active'); }
+        function submitRSVP(answer) { const m = document.getElementById('status-msg'); m.style.display = 'block'; m.innerHTML = answer==='Да' ? "Спасибо! Мы очень ждем вас! 🎉" : "Жаль, что не сможете прийти. Спасибо за ответ! 😔"; }
+        const weddingDate = new Date("Sep 20, 2027 14:00:00").getTime();
+        function updateTimer() {
+            const now = new Date().getTime(); const diff = weddingDate - now;
+            if (diff <= 0) { document.querySelector(".countdown").innerHTML = "<div>Этот день настал! ❤️</div>"; return; }
+            const d = Math.floor(diff/(1000*60*60*24)), h = Math.floor((diff%(1000*60*60*24))/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
+            document.getElementById("days").innerText = String(d).padStart(2,'0'); document.getElementById("hours").innerText = String(h).padStart(2,'0'); document.getElementById("minutes").innerText = String(m).padStart(2,'0'); document.getElementById("seconds").innerText = String(s).padStart(2,'0');
+        }
+        setInterval(updateTimer, 1000); updateTimer();
+        const oceanParticles = ['🐚', '🫧', '⭐', '🫧', '✨'];
+        function createParticle() {
+            const container = document.getElementById('particles'); if(!container) return;
+            const p = document.createElement('div'); p.className = 'particle'; p.innerText = oceanParticles[Math.floor(Math.random()*oceanParticles.length)];
+            p.style.left = Math.random()*100 + 'vw'; p.style.fontSize = (Math.random()*14+13)+'px'; p.style.animationDuration = (Math.random()*3+6)+'s';
+            container.appendChild(p); setTimeout(() => { p.remove(); }, 9000);
+        }
+        setInterval(createParticle, 350);
+    </script>
+</body>
+</html>
